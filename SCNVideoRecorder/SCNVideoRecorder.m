@@ -166,10 +166,10 @@ enum RecorderState
 
 - (void)recordVideoToFile:(NSString *)outputFile completion:(void (^)( NSString *videoFilePath ))completion
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    //dispatch_async(dispatch_get_main_queue(), ^{
         [self _recordVideoToFile:outputFile
                          completion:completion];
-    });
+    //});
 }
 
 

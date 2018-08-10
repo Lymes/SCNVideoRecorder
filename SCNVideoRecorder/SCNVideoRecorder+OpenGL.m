@@ -146,10 +146,15 @@ static EAGLContext *_localOpenGLContext;
     NSURL *flipURL =
     [[NSBundle bundleWithIdentifier:@"com.lymes.SCNVideoRecorder"] URLForResource:@"art.scnassets/techniques/flipScene"
                             withExtension:@"json"];
-    NSDictionary *flipDic = [NSJSONSerialization
+    NSMutableDictionary *flipDic = [NSJSONSerialization
                              JSONObjectWithData:[NSData dataWithContentsOfURL:flipURL]
-                             options:0
+                             options:NSJSONReadingMutableContainers
                              error:nil];
+    NSString *programPath = flipDic[@"passes"][@"flipScene"][@"program"];
+    NSString *appPath = NSBundle.mainBundle.bundlePath;
+    NSString *frameworkPath = [NSBundle bundleWithIdentifier:@"com.lymes.SCNVideoRecorder"].bundlePath;
+    NSString *frameworkRelativePath = [frameworkPath stringByReplacingOccurrencesOfString:appPath withString:@""];    
+    flipDic[@"passes"][@"flipScene"][@"program"] = [frameworkRelativePath stringByAppendingPathComponent:programPath];
     SCNTechnique *flipTechnique =
     [SCNTechnique techniqueWithDictionary:flipDic];
     self.videoRenderer.technique = flipTechnique;
@@ -194,10 +199,10 @@ static EAGLContext *_localOpenGLContext;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, _movieFramebuffer);
     glViewport(0, 0, (int)self.videoSize.width, (int)self.videoSize.height);
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glClearColor(1.0, 1.0, 1.0, 1.0);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    self.videoRenderer.scene = self.scnView.scene;
+    self.videoRenderer.scene       = self.scnView.scene;
     self.videoRenderer.pointOfView = self.scnView.pointOfView;
     [self.videoRenderer renderAtTime:time];
     
