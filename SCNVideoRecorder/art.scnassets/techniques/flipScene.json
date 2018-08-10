@@ -1,0 +1,27 @@
+{
+    "passes" : {
+        "flipScene" : {
+            "outputs" : {
+                "color" : "COLOR"
+            },
+            "inputs" : {
+                "textureUnit" : "COLOR",
+                "position"    : "a_position-symbol",
+                "textureCoordinate" : "a_texcoord-symbol",
+            },
+            "program" : "art.scnassets/techniques/flipScene",
+            "draw"    : "DRAW_QUAD"
+        }
+    },
+    "sequence" : [
+                  "flipScene"
+                  ],
+    "symbols" : {
+        "a_position-symbol" : {
+            "semantic" : "vertex"
+        },
+        "a_texcoord-symbol" : {
+            "semantic" : "texcoord"
+        },
+    }
+}
