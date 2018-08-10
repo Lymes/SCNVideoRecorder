@@ -34,6 +34,7 @@ static id<MTLTexture> _metalTexture;
 
 @implementation SCNVideoRecorder (Metal)
 
+
 - (void)prepareMetal
 {
     id<MTLDevice> device = self.scnView.device;
@@ -61,6 +62,7 @@ static id<MTLTexture> _metalTexture;
     }
 }
 
+
 - (void)tearDownMetal
 {
     if (_coreVideoMetalTextureCache)
@@ -69,6 +71,7 @@ static id<MTLTexture> _metalTexture;
         _coreVideoMetalTextureCache = 0;
     }
 }
+
 
 - (void)renderMetalAtTime:(NSTimeInterval)time
 {

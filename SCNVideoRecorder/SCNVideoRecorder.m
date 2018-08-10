@@ -55,7 +55,6 @@ enum RecorderState
     AVAssetWriterInput *_assetWriterVideoInput;
     AVAssetWriterInputPixelBufferAdaptor *_assetWriterPixelBufferInput;
     
-    AVAudioPlayer *_audioPlayer;
     AVCaptureSession *_capSession;
     AVCaptureAudioDataOutput *_audioOutput;
     AVAssetWriterInput *_assetWriterAudioInput;

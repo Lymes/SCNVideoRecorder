@@ -194,7 +194,7 @@ static EAGLContext *_localOpenGLContext;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, _movieFramebuffer);
     glViewport(0, 0, (int)self.videoSize.width, (int)self.videoSize.height);
-    glClearColor(0, 0, 0, 1);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     self.videoRenderer.scene = self.scnView.scene;
