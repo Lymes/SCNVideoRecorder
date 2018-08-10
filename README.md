@@ -31,7 +31,7 @@ static SCNVideoRecorder *_videoRecorder;
     }
     else
     {
-        [self stopRecording:self];
+        [_videoRecorder stop];
     }
 }
 ```
