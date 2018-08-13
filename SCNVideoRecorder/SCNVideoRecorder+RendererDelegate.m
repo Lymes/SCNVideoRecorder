@@ -35,11 +35,11 @@ static id<SCNSceneRendererDelegate> _origRendererDelegate;
 - (void)injectDelegate
 {
     id<SCNSceneRendererDelegate> delegate = self.scnView.delegate;
-    if ( delegate && delegate != self )
+    if ( delegate != self )
     {
         _origRendererDelegate = delegate;
-        self.scnView.delegate = (id<SCNSceneRendererDelegate>)self;
     }
+    self.scnView.delegate = (id<SCNSceneRendererDelegate>)self;
 }
 
 #pragma mark - SCNSceneRendererDelegate
@@ -68,7 +68,6 @@ static id<SCNSceneRendererDelegate> _origRendererDelegate;
     }
 }
 
-
 - (void)renderer:(id <SCNSceneRenderer>)renderer didApplyConstraintsAtTime:(NSTimeInterval)time
 {
     if ( _origRendererDelegate && [_origRendererDelegate respondsToSelector:@selector(renderer:didApplyConstraintsAtTime:)] )
@@ -85,7 +84,6 @@ static id<SCNSceneRendererDelegate> _origRendererDelegate;
         [_origRendererDelegate renderer:renderer willRenderScene:scene atTime:time];
     }
 }
-
 
 - (void)renderer:(id <SCNSceneRenderer>)renderer didRenderScene:(SCNScene *)scene atTime:(NSTimeInterval)time
 {
