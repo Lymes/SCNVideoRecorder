@@ -29,6 +29,7 @@
 
 #import "SCNVideoRecorder+OpenGL.h"
 #import "SCNVideoRecorder+Metal.h"
+#import "SCNVideoRecorder+RendererDelegate.h"
 
 
 #define kPreferredFPS 60
@@ -206,6 +207,7 @@ enum RecorderState
     
     [self setupVideoCapture];
     [self setupAudioCapture];
+    [self injectDelegate];
     
     [_assetWriter startWriting];
     [_assetWriter startSessionAtSourceTime:kCMTimeZero];

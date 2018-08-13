@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1B5C15AA21223E08001D5649 /* SCNVideoRecorder+RendererDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 1B5C15A821223E08001D5649 /* SCNVideoRecorder+RendererDelegate.h */; };
+		1B5C15AB21223E08001D5649 /* SCNVideoRecorder+RendererDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B5C15A921223E08001D5649 /* SCNVideoRecorder+RendererDelegate.m */; };
 		1BCBEF0C211E2AB500CF6F5D /* SCNVideoRecorder.h in Headers */ = {isa = PBXBuildFile; fileRef = 1BCBEEFE211E2AB500CF6F5D /* SCNVideoRecorder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1BCBEF2F211E2B5100CF6F5D /* SCNVideoRecorder+Metal.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BCBEF2A211E2B5000CF6F5D /* SCNVideoRecorder+Metal.m */; };
 		1BCBEF30211E2B5100CF6F5D /* SCNVideoRecorder+Metal.h in Headers */ = {isa = PBXBuildFile; fileRef = 1BCBEF2B211E2B5000CF6F5D /* SCNVideoRecorder+Metal.h */; };
@@ -19,6 +21,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1B5C15A821223E08001D5649 /* SCNVideoRecorder+RendererDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SCNVideoRecorder+RendererDelegate.h"; sourceTree = "<group>"; };
+		1B5C15A921223E08001D5649 /* SCNVideoRecorder+RendererDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "SCNVideoRecorder+RendererDelegate.m"; sourceTree = "<group>"; };
 		1BCBEEFB211E2AB500CF6F5D /* SCNVideoRecorder.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SCNVideoRecorder.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BCBEEFE211E2AB500CF6F5D /* SCNVideoRecorder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SCNVideoRecorder.h; sourceTree = "<group>"; };
 		1BCBEEFF211E2AB500CF6F5D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -69,6 +73,8 @@
 				1BCBEF2D211E2B5100CF6F5D /* SCNVideoRecorder+OpenGL.h */,
 				1BCBEF2C211E2B5000CF6F5D /* SCNVideoRecorder+OpenGL.m */,
 				1BCBEF2E211E2B5100CF6F5D /* SCNVideoRecorder+Private.h */,
+				1B5C15A821223E08001D5649 /* SCNVideoRecorder+RendererDelegate.h */,
+				1B5C15A921223E08001D5649 /* SCNVideoRecorder+RendererDelegate.m */,
 				1BCBEF40211E2E8400CF6F5D /* art.scnassets */,
 				1BCBEEFF211E2AB500CF6F5D /* Info.plist */,
 				1BCBEF42211E30FC00CF6F5D /* README.md */,
@@ -86,6 +92,7 @@
 				1BCBEF32211E2B5100CF6F5D /* SCNVideoRecorder+OpenGL.h in Headers */,
 				1BCBEF0C211E2AB500CF6F5D /* SCNVideoRecorder.h in Headers */,
 				1BCBEF30211E2B5100CF6F5D /* SCNVideoRecorder+Metal.h in Headers */,
+				1B5C15AA21223E08001D5649 /* SCNVideoRecorder+RendererDelegate.h in Headers */,
 				1BCBEF33211E2B5100CF6F5D /* SCNVideoRecorder+Private.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -159,6 +166,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B5C15AB21223E08001D5649 /* SCNVideoRecorder+RendererDelegate.m in Sources */,
 				1BCBEF35211E2B8600CF6F5D /* SCNVideoRecorder.m in Sources */,
 				1BCBEF2F211E2B5100CF6F5D /* SCNVideoRecorder+Metal.m in Sources */,
 				1BCBEF31211E2B5100CF6F5D /* SCNVideoRecorder+OpenGL.m in Sources */,
