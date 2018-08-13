@@ -1,6 +1,6 @@
 //
 //  SCNVideoRecorder+OpenGL.h
-//  MetalRecording
+//  SCNVideoRecorder
 //
 //  Created by Leonid Mesentsev on 10/08/2018.
 //  Copyright © 2018 Bridge Comm. All rights reserved.
