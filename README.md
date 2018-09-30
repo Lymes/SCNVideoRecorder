@@ -2,9 +2,9 @@
 
 A very fast SceneKit (Metal & OpenGL) video recorder using FAST DMA cached textures
 
-Usage example
+### Usage example:
 
-Swift
+*Swift*
 ```
 class ViewController: UIViewController {
 
@@ -36,7 +36,7 @@ class ViewController: UIViewController {
 }
 ```
 
-Objective-C
+*Objective-C*
 ```
 static SCNVideoRecorder *_videoRecorder;
 
