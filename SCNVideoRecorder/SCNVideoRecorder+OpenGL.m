@@ -34,6 +34,7 @@ static CVOpenGLESTextureCacheRef _coreVideoOpenGLTextureCache;
 static CVOpenGLESTextureRef _openGLTexture;
 static GLuint _depthTexture;
 static GLuint _movieFramebuffer;
+static EAGLContext *_localOpenGLContext;
 
 @implementation SCNVideoRecorder (OpenGL)
 
@@ -41,6 +42,13 @@ static GLuint _movieFramebuffer;
 - (void)prepareOpenGL
 {
     EAGLContext *mainContext = self.scnView.eaglContext;
+    if ( !_localOpenGLContext )
+    {
+        _localOpenGLContext =
+        [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
+                              sharegroup:mainContext.sharegroup];
+    }
+    
     mainContext.multiThreaded = YES;
     CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.scnView.layer;
     eaglLayer.opaque = TRUE;
@@ -61,7 +69,7 @@ static GLuint _movieFramebuffer;
         CFRelease(number);
         
         CVReturn err = CVOpenGLESTextureCacheCreate(
-                                                    kCFAllocatorDefault, cache_attrs, mainContext, NULL,
+                                                    kCFAllocatorDefault, cache_attrs, _localOpenGLContext, NULL,
                                                     &_coreVideoOpenGLTextureCache);
         CFRelease(cache_attrs);
         if (err != kCVReturnSuccess)
@@ -70,6 +78,10 @@ static GLuint _movieFramebuffer;
             return;
         }
     }
+    
+    [EAGLContext setCurrentContext:self.scnView.context];
+    glFlush();
+    [EAGLContext setCurrentContext:_localOpenGLContext];
     
     if (!_movieFramebuffer)
     {
@@ -196,10 +208,9 @@ static GLuint _movieFramebuffer;
     self.videoRenderer.pointOfView = self.scnView.pointOfView;
     [self.videoRenderer renderAtTime:time];
     
-    glFlush();
+    glFinish();
 
 #if TARGET_IPHONE_SIMULATOR
-    glFinish();
     CVPixelBufferLockBaseAddress( self.pixelBuffer, 0 );
     GLubyte *pixelBufferData = (GLubyte *)CVPixelBufferGetBaseAddress( self.pixelBuffer );
     glReadPixels( 0, 0, self.videoSize.width, self.videoSize.height, GL_BGRA, GL_UNSIGNED_BYTE, pixelBufferData );
