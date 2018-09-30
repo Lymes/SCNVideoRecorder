@@ -49,6 +49,7 @@ enum RecorderState
     STOPPED,
     STOPPING,
     RUNNING,
+    STARTING,
 };
 
 @interface SCNVideoRecorder ()
@@ -122,14 +123,14 @@ enum RecorderState
         CVReturn err = CVPixelBufferPoolCreate(kCFAllocatorDefault, NULL, (__bridge CFDictionaryRef _Nullable)(sourcePixelBufferAttributesDictionary), &bufferPool);
         if ( err != kCVReturnSuccess )
         {
-            NSLog(@"Cannot create buffer pool");
+            NSLog(@"SCNVideoRecorder: Cannot create buffer pool");
         }
         
         CVReturn status = CVPixelBufferPoolCreatePixelBuffer(
                                                              kCFAllocatorDefault, bufferPool, &_pixelBuffer);
         if (!_pixelBuffer && status != kCVReturnSuccess)
         {
-            NSLog(@"Cannot create pixel buffer");
+            NSLog(@"SCNVideoRecorder: Cannot create pixel buffer");
         }
         
         [self prepareRendering];
@@ -186,42 +187,16 @@ enum RecorderState
         }
         return;
     }
-    
+    [self injectDelegate];
     _sessionCompletion = completion;
-    _state = STOPPED;
     _outputFile = outputFile;
     _presentationTime = CMTimeMake(0, kPreferredFPS);
-    
-    NSError *error = nil;
-    [[NSFileManager defaultManager] removeItemAtPath:_outputFile error:&error];
-    
-    _assetWriter =
-    [[AVAssetWriter alloc] initWithURL:[NSURL fileURLWithPath:_outputFile]
-                              fileType:AVFileTypeMPEG4
-                                 error:&error];
-    if (error != nil)
-    {
-        NSLog(@"Error: %@", error);
-        if (completion)
-        {
-            completion(nil);
-        }
-    }
-    
-    [self setupVideoCapture];
-    [self setupAudioCapture];
-    [self injectDelegate];
-    
-    [_assetWriter startWriting];
-    [_assetWriter startSessionAtSourceTime:kCMTimeZero];
-    
-    _initTime = 0;
-    _state = RUNNING;
+    _state = STARTING;
 }
 
 - (void)recordFrameAtTime:(NSTimeInterval)time
 {
-    if (_state != RUNNING)
+    if (_state != RUNNING && _state != STARTING)
     {
         if (_state == STOPPING)
         {
@@ -240,26 +215,56 @@ enum RecorderState
     static int64_t lastFrameTime = -1;
     static CFTimeInterval lastTime = 0;
     
-    if (_assetWriterVideoInput.readyForMoreMediaData)
-    {
-        CFTimeInterval currentTime = CACurrentMediaTime();
-        !_initTime && (_initTime = currentTime);
-        int64_t frameTime = (currentTime - _initTime) * kPreferredFPS;
-        if (frameTime != lastFrameTime)
+    dispatch_async(_sessionQueue, ^() {
+        if ( !self->_assetWriter )
         {
-            _presentationTime = CMTimeMake(frameTime, kPreferredFPS);
-            if (![_assetWriterPixelBufferInput
-                  appendPixelBuffer:_pixelBuffer
-                  withPresentationTime:_presentationTime])
+            NSError *error = nil;
+            [[NSFileManager defaultManager] removeItemAtPath:self->_outputFile error:&error];
+            
+            self->_assetWriter =
+            [[AVAssetWriter alloc] initWithURL:[NSURL fileURLWithPath:self->_outputFile]
+                                      fileType:AVFileTypeMPEG4
+                                         error:&error];
+            if (error != nil)
             {
-                NSLog(@"Problem appending video buffer at time: %@",
-                      CFBridgingRelease(CMTimeCopyDescription(
-                                                              kCFAllocatorDefault, _presentationTime)));
+                NSLog(@"SCNVideoRecorder: Error: %@", error);
+                if (self->_sessionCompletion)
+                {
+                    self->_sessionCompletion(nil);
+                }
             }
+            
+            [self setupVideoCapture];
+            [self setupAudioCapture];
+            
+            [self->_assetWriter startWriting];
+            [self->_assetWriter startSessionAtSourceTime:kCMTimeZero];
+            
+            self->_initTime = 0;
+            self->_state = RUNNING;
         }
-        lastTime = currentTime;
-        lastFrameTime = frameTime;
-    }
+        
+        if (self->_assetWriterVideoInput.readyForMoreMediaData)
+        {
+            CFTimeInterval currentTime = CACurrentMediaTime();
+            !self->_initTime && (self->_initTime = currentTime);
+            int64_t frameTime = (currentTime - self->_initTime) * kPreferredFPS;
+            if (frameTime != lastFrameTime)
+            {
+                self->_presentationTime = CMTimeMake(frameTime, kPreferredFPS);
+                if (![self->_assetWriterPixelBufferInput
+                      appendPixelBuffer:self->_pixelBuffer
+                      withPresentationTime:self->_presentationTime])
+                {
+                    NSLog(@"SCNVideoRecorder: Problem appending video buffer at time: %@",
+                          CFBridgingRelease(CMTimeCopyDescription(
+                                                                  kCFAllocatorDefault, self->_presentationTime)));
+                }
+            }
+            lastTime = currentTime;
+            lastFrameTime = frameTime;
+        }
+    });
 }
 
 
@@ -285,7 +290,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         CMSampleBufferGetOutputPresentationTimeStamp(syncedSample);
         if (!_assetWriterAudioInput.readyForMoreMediaData)
         {
-            NSLog(@"Had to drop an audio frame %@",
+            NSLog(@"SCNVideoRecorder: Had to drop an audio frame %@",
                   CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault,
                                                           currentSampleTime)));
         }
@@ -293,7 +298,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         {
             if (![_assetWriterAudioInput appendSampleBuffer:syncedSample])
             {
-                NSLog(@"Problem appending audio buffer at time: %@",
+                NSLog(@"SCNVideoRecorder: Problem appending audio buffer at time: %@",
                       CFBridgingRelease(CMTimeCopyDescription(
                                                               kCFAllocatorDefault, currentSampleTime)));
             }
@@ -393,7 +398,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                         error:&error];
     if (error)
     {
-        NSLog(@"Cannot set mixing options.");
+        NSLog(@"SCNVideoRecorder: Cannot set mixing options.");
         return;
     }
     
@@ -402,7 +407,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         BOOL success = [audioSession setInputGain:1. error:&error];
         if (!success)
         {
-            NSLog(@"inputGain error: %@", error);
+            NSLog(@"SCNVideoRecorder: inputGain error: %@", error);
         }
     }
     
@@ -412,7 +417,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     [audioSession setActive:YES error:&error];
     if (error)
     {
-        NSLog(@"Cannot override output audio port.");
+        NSLog(@"SCNVideoRecorder: Cannot override output audio port.");
         return;
     }
     
@@ -465,7 +470,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     
     if (!audioDevice)
     {
-        NSLog(@"Audio input device not found");
+        NSLog(@"SCNVideoRecorder: Audio input device not found");
         return;
     }
     AVCaptureDeviceInput *audioInput =

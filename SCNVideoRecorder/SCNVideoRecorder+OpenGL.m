@@ -74,7 +74,7 @@ static EAGLContext *_localOpenGLContext;
         CFRelease(cache_attrs);
         if (err != kCVReturnSuccess)
         {
-            NSLog(@"Failed to create Core Video texture cache, error %d", err);
+            NSLog(@"SCNVideoRecorder: Failed to create Core Video texture cache, error %d", err);
             return;
         }
     }
@@ -122,7 +122,7 @@ static EAGLContext *_localOpenGLContext;
         
         if( err != kCVReturnSuccess )
         {
-            NSLog(@"Failed to create OpenGL texture, error %d", err);
+            NSLog(@"SCNVideoRecorder: Failed to create OpenGL texture, error %d", err);
             return;
         }
     }
@@ -139,7 +139,7 @@ static EAGLContext *_localOpenGLContext;
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
     {
-        NSLog(@"Incomplete filter FBO: %d", status);
+        NSLog(@"SCNVideoRecorder: Incomplete filter FBO: %d", status);
     }
     
     NSURL *flipURL =

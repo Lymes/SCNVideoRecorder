@@ -46,7 +46,7 @@ static id<MTLTexture> _metalTexture;
         CVReturn err = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, device, nil, &_coreVideoMetalTextureCache);
         if( err != kCVReturnSuccess )
         {
-            NSLog(@"Failed to create Core Video texture cache, error %d", err);
+            NSLog(@"SCNVideoRecorder: Failed to create Core Video texture cache, error %d", err);
             return;
         }
     }
@@ -57,14 +57,14 @@ static id<MTLTexture> _metalTexture;
         CVReturn err = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, _coreVideoMetalTextureCache, self.pixelBuffer, (__bridge CFDictionaryRef _Nullable)(attrs), MTLPixelFormatBGRA8Unorm_sRGB, self.videoSize.width, self.videoSize.height, 0, &texture);
         if( err != kCVReturnSuccess )
         {
-            NSLog(@"Failed to create Metal texture, error %d", err);
+            NSLog(@"SCNVideoRecorder: Failed to create Metal texture, error %d", err);
             return;
         }
         _metalTexture = CVMetalTextureGetTexture(texture);
         CFRelease(texture);
     }
 #else
-    NSLog(@"Metal is not yet supported for simulator.");
+    NSLog(@"SCNVideoRecorder: Metal is not yet supported for simulator.");
 #endif
 }
 
@@ -78,7 +78,7 @@ static id<MTLTexture> _metalTexture;
         _coreVideoMetalTextureCache = 0;
     }
 #else
-    NSLog(@"Metal is not yet supported for simulator.");
+    NSLog(@"SCNVideoRecorder: Metal is not yet supported for simulator.");
 #endif
 }
 
@@ -103,7 +103,7 @@ static id<MTLTexture> _metalTexture;
     }];
     [commandBuffer commit];
 #else
-    NSLog(@"Metal is not yet supported for simulator.");
+    NSLog(@"SCNVideoRecorder: Metal is not yet supported for simulator.");
 #endif
 }
 

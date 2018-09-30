@@ -55,14 +55,12 @@ class ViewController: UIViewController {
             let videoPath = NSHomeDirectory().appending("/Documents/video.mp4")
             videoRecorder?.recordVideo(toFile: videoPath) { (outputFile) in
                 if outputFile != nil {
-                    DispatchQueue.main.async {
-                        let playerViewController = AVPlayerViewController()
-                        let player = AVPlayer(url: URL(fileURLWithPath: videoPath))
-                        playerViewController.player = player
-                        self.present(playerViewController, animated: true, completion: {
-                            player.play()
-                        })
-                    }
+                    let playerViewController = AVPlayerViewController()
+                    let player = AVPlayer(url: URL(fileURLWithPath: videoPath))
+                    playerViewController.player = player
+                    self.present(playerViewController, animated: true, completion: {
+                        player.play()
+                    })
                 }
                 else {
                 }

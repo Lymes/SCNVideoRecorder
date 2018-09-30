@@ -23,14 +23,12 @@ class ViewController: UIViewController {
             let videoPath = NSHomeDirectory().appending("/Documents/video.mp4")
             videoRecorder?.recordVideo(toFile: videoPath) { (outputFile) in
                 if outputFile != nil {
-                    DispatchQueue.main.async {
-                        let playerViewController = AVPlayerViewController()
-                        let player = AVPlayer(url: URL(fileURLWithPath: videoPath))
-                        playerViewController.player = player
-                        self.present(playerViewController, animated: true, completion: {
-                            player.play()
-                        })
-                    }
+                    let playerViewController = AVPlayerViewController()
+                    let player = AVPlayer(url: URL(fileURLWithPath: videoPath))
+                    playerViewController.player = player
+                    self.present(playerViewController, animated: true, completion: {
+                        player.play()
+                    })
                 }
             }
         }
@@ -57,14 +55,12 @@ static SCNVideoRecorder *_videoRecorder;
         [_videoRecorder recordVideoToFile:output completion:^(NSString *recordedFile) {
             if ( recordedFile )
             {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    AVPlayerViewController *playerViewController = [AVPlayerViewController new];
-                    AVPlayer *player = [[AVPlayer alloc] initWithURL:[NSURL fileURLWithPath:videoPath]];
-                    playerViewController.player = player;
-                    [self presentViewController:playerViewController animated:YES completion:^{
-                        [player play];
-                    }];
-                });
+                AVPlayerViewController *playerViewController = [AVPlayerViewController new];
+                AVPlayer *player = [[AVPlayer alloc] initWithURL:[NSURL fileURLWithPath:videoPath]];
+                playerViewController.player = player;
+                [self presentViewController:playerViewController animated:YES completion:^{
+                    [player play];
+                }];
             }
         }
     }
