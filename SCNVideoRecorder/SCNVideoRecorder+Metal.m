@@ -63,6 +63,8 @@ static id<MTLTexture> _metalTexture;
         _metalTexture = CVMetalTextureGetTexture(texture);
         CFRelease(texture);
     }
+    [self recordFrameAtTime:0];
+    [self recordFrameAtTime:0];
 #else
     NSLog(@"SCNVideoRecorder: Metal is not yet supported for simulator.");
 #endif

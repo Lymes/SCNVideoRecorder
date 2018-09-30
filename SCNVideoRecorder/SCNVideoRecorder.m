@@ -215,6 +215,11 @@ enum RecorderState
     static int64_t lastFrameTime = -1;
     static CFTimeInterval lastTime = 0;
     
+    if (_state != RUNNING && _state != STARTING)
+    {
+        return;
+    }
+    
     dispatch_async(_sessionQueue, ^() {
         if ( !self->_assetWriter )
         {

@@ -160,6 +160,9 @@ static EAGLContext *_localOpenGLContext;
     SCNTechnique *flipTechnique =
     [SCNTechnique techniqueWithDictionary:flipDic];
     self.videoRenderer.technique = flipTechnique;
+    
+    [self recordFrameAtTime:0];
+    [self recordFrameAtTime:0];
 }
 
 
