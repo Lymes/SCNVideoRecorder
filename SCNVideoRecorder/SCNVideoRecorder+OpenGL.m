@@ -34,8 +34,6 @@ static CVOpenGLESTextureCacheRef _coreVideoOpenGLTextureCache;
 static CVOpenGLESTextureRef _openGLTexture;
 static GLuint _depthTexture;
 static GLuint _movieFramebuffer;
-static EAGLContext *_localOpenGLContext;
-
 
 @implementation SCNVideoRecorder (OpenGL)
 
@@ -43,13 +41,6 @@ static EAGLContext *_localOpenGLContext;
 - (void)prepareOpenGL
 {
     EAGLContext *mainContext = self.scnView.eaglContext;
-    if ( !_localOpenGLContext )
-    {
-        _localOpenGLContext =
-        [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
-                              sharegroup:mainContext.sharegroup];
-    }
-    
     mainContext.multiThreaded = YES;
     CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.scnView.layer;
     eaglLayer.opaque = TRUE;
@@ -70,7 +61,7 @@ static EAGLContext *_localOpenGLContext;
         CFRelease(number);
         
         CVReturn err = CVOpenGLESTextureCacheCreate(
-                                                    kCFAllocatorDefault, cache_attrs, _localOpenGLContext, NULL,
+                                                    kCFAllocatorDefault, cache_attrs, mainContext, NULL,
                                                     &_coreVideoOpenGLTextureCache);
         CFRelease(cache_attrs);
         if (err != kCVReturnSuccess)
@@ -79,10 +70,6 @@ static EAGLContext *_localOpenGLContext;
             return;
         }
     }
-    
-    [EAGLContext setCurrentContext:self.scnView.context];
-    glFlush();
-    [EAGLContext setCurrentContext:_localOpenGLContext];
     
     if (!_movieFramebuffer)
     {
@@ -153,7 +140,10 @@ static EAGLContext *_localOpenGLContext;
     NSString *programPath = flipDic[@"passes"][@"flipScene"][@"program"];
     NSString *appPath = NSBundle.mainBundle.bundlePath;
     NSString *frameworkPath = [NSBundle bundleWithIdentifier:@"com.lymes.SCNVideoRecorder"].bundlePath;
-    NSString *frameworkRelativePath = [frameworkPath stringByReplacingOccurrencesOfString:appPath withString:@""];    
+    NSString *frameworkRelativePath = [frameworkPath stringByReplacingOccurrencesOfString:appPath withString:@""];
+#if TARGET_IPHONE_SIMULATOR
+    frameworkRelativePath = @"Frameworks/SCNVideoRecorder.framework";
+#endif
     flipDic[@"passes"][@"flipScene"][@"program"] = [frameworkRelativePath stringByAppendingPathComponent:programPath];
     SCNTechnique *flipTechnique =
     [SCNTechnique techniqueWithDictionary:flipDic];
@@ -188,28 +178,42 @@ static EAGLContext *_localOpenGLContext;
 
 - (void)renderOpenGLAtTime:(NSTimeInterval)time
 {
+    [EAGLContext setCurrentContext:self.scnView.context];
+
     static GLint originalFB = 0;
     static GLint originalViewport[4];
-    
-    [EAGLContext setCurrentContext:self.scnView.context];
     if ( !originalFB )
     {
         glGetIntegerv(GL_VIEWPORT, originalViewport);
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &originalFB);
     }
+    
+
     glBindFramebuffer(GL_FRAMEBUFFER, _movieFramebuffer);
     glViewport(0, 0, (int)self.videoSize.width, (int)self.videoSize.height);
-    //glClearColor(1.0, 1.0, 1.0, 1.0);
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     self.videoRenderer.scene       = self.scnView.scene;
     self.videoRenderer.pointOfView = self.scnView.pointOfView;
     [self.videoRenderer renderAtTime:time];
     
     glFlush();
+
+#if TARGET_IPHONE_SIMULATOR
+    glFinish();
+    CVPixelBufferLockBaseAddress( self.pixelBuffer, 0 );
+    GLubyte *pixelBufferData = (GLubyte *)CVPixelBufferGetBaseAddress( self.pixelBuffer );
+    glReadPixels( 0, 0, self.videoSize.width, self.videoSize.height, GL_BGRA, GL_UNSIGNED_BYTE, pixelBufferData );
+    GLenum error = glGetError();
+    if ( GL_NO_ERROR != error )
+    {
+        NSLog( @"SCNVideoRecorder: GLError 0x%x", error );
+    }
+    CVPixelBufferUnlockBaseAddress( self.pixelBuffer, 0 );
+#endif
+    
     glBindFramebuffer(GL_FRAMEBUFFER, originalFB);
     glViewport(originalViewport[0], originalViewport[1], originalViewport[2], originalViewport[3]);
-    
+
     [self encodeRenderedFrame];
 }
 

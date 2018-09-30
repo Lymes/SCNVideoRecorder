@@ -25,18 +25,21 @@
 
 #import "SCNVideoRecorder+Metal.h"
 #import "SCNVideoRecorder+Private.h"
-#import <Metal/Metal.h>
 
+@import AVFoundation;
+@import MetalKit;
 
+#if !TARGET_IPHONE_SIMULATOR
 static CVMetalTextureCacheRef _coreVideoMetalTextureCache;
 static id<MTLTexture> _metalTexture;
-
+#endif
 
 @implementation SCNVideoRecorder (Metal)
 
 
 - (void)prepareMetal
 {
+#if !TARGET_IPHONE_SIMULATOR
     id<MTLDevice> device = self.scnView.device;
     if ( !_coreVideoMetalTextureCache )
     {
@@ -60,21 +63,29 @@ static id<MTLTexture> _metalTexture;
         _metalTexture = CVMetalTextureGetTexture(texture);
         CFRelease(texture);
     }
+#else
+    NSLog(@"Metal is not yet supported for simulator.");
+#endif
 }
 
 
 - (void)tearDownMetal
 {
+#if !TARGET_IPHONE_SIMULATOR
     if (_coreVideoMetalTextureCache)
     {
         CFRelease(_coreVideoMetalTextureCache);
         _coreVideoMetalTextureCache = 0;
     }
+#else
+    NSLog(@"Metal is not yet supported for simulator.");
+#endif
 }
 
 
 - (void)renderMetalAtTime:(NSTimeInterval)time
 {
+#if !TARGET_IPHONE_SIMULATOR
     CGRect viewport = CGRectMake(0, 0, self.videoSize.width, self.videoSize.height);
     // write to offscreenTexture, clear the texture before rendering using white, store the result
     MTLRenderPassDescriptor *renderPassDescriptor = [MTLRenderPassDescriptor new];
@@ -91,6 +102,9 @@ static id<MTLTexture> _metalTexture;
         [self encodeRenderedFrame];
     }];
     [commandBuffer commit];
+#else
+    NSLog(@"Metal is not yet supported for simulator.");
+#endif
 }
 
 @end

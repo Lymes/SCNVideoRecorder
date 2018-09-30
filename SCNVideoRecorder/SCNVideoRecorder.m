@@ -24,12 +24,13 @@
 // THE SOFTWARE.
 
 #import "SCNVideoRecorder.h"
-#import <AVFoundation/AVFoundation.h>
-#import <SceneKit/SceneKit.h>
-
 #import "SCNVideoRecorder+OpenGL.h"
 #import "SCNVideoRecorder+Metal.h"
 #import "SCNVideoRecorder+RendererDelegate.h"
+
+@import AVFoundation;
+@import SceneKit;
+@import Metal;
 
 
 #define kPreferredFPS 60
@@ -68,6 +69,7 @@ enum RecorderState
     CMTime _presentationTime;
     
     void (^_sessionCompletion)(NSString *videoFilePath);
+    dispatch_queue_t _sessionQueue;
 }
 
 @end
@@ -84,9 +86,9 @@ enum RecorderState
 {
     self = [super init];
     if (self)
-    {
+    {        
         _scnView = view;
-        
+        _sessionQueue = dispatch_queue_create("SCNVideoRecordingQueue", 0);
         CGSize canvasSize = _scnView.bounds.size;
         canvasSize.width *= _scnView.contentScaleFactor;
         canvasSize.height *= _scnView.contentScaleFactor;
@@ -94,9 +96,10 @@ enum RecorderState
         CGFloat ratio = canvasSize.height / canvasSize.width;
         _videoSize = [self normalizeSize:CGSizeMake(480, 480 * ratio)];
         
-        if ( _scnView.device )
+        if ( self.isMetalRendering )
         {
-            _videoRenderer = [SCNRenderer rendererWithDevice:_scnView.device options:nil];
+            id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+            _videoRenderer = [SCNRenderer rendererWithDevice:device options:nil];
         }
         else
         {
@@ -143,7 +146,7 @@ enum RecorderState
 
 - (BOOL)isMetalRendering
 {
-    return _scnView.device != nil;
+    return _scnView.context == nil;
 }
 
 
@@ -167,10 +170,10 @@ enum RecorderState
 
 - (void)recordVideoToFile:(NSString *)outputFile completion:(void (^)( NSString *videoFilePath ))completion
 {
-    //dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(_sessionQueue, ^{
         [self _recordVideoToFile:outputFile
                          completion:completion];
-    //});
+    });
 }
 
 
